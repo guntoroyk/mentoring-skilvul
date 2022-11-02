@@ -1,3 +1,5 @@
+const Product = require("../models/product.model");
+
 const products = [
   {
     id: 1,
@@ -13,30 +15,43 @@ const products = [
   },
 ];
 
-function getProducts(req, res) {
-  res.json(products);
-}
-
-function getProductDetail(req, res) {
-  const product = products.find((p) => p.id === parseInt(req.params.id));
-  if (!product) {
-    res.status(404).send("Product not found");
-  } else {
-    res.json(product);
+async function getProducts(req, res) {
+  try {
+    const products = await Product.fetchAll();
+    res.json(products);
+  } catch (error) {
+    console.log(error);
   }
 }
 
-function createProduct(req, res) {
+async function getProductDetail(req, res) {
+  try {
+    const result = await Product.findById(req.params.id);
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+async function createProduct(req, res) {
   console.log("req.body", req.body);
 
-  const product = {
-    id: products.length + 1,
-    name: req.body.name,
-    price: req.body.price,
-    description: req.body.description,
-  };
-  products.push(product);
-  res.status(201).json(product);
+  try {
+    const product = new Product(
+      req.body.name,
+      req.body.desc,
+      req.body.price,
+      req.body.seller_id
+    );
+
+    await product.save();
+
+    res.status(201).json(product);
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({ message: "Internal server error" });
+  }
 }
 
 module.exports = {
