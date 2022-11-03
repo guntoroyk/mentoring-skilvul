@@ -8,8 +8,16 @@ class Product {
     this.seller_id = seller_id;
   }
 
-  static async fetchAll() {
-    const [rows] = await db.promise().query("SELECT * FROM products");
+  static async fetchAll(filter) {
+    let query = "SELECT * FROM products";
+
+    const where = [];
+    if (filter && filter.seller_id) {
+      query += " WHERE seller_id = ?";
+      where.push(filter.seller_id);
+    }
+
+    const [rows] = await db.promise().query(query, where);
     return rows;
   }
 

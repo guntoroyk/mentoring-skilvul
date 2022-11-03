@@ -15,27 +15,36 @@ const products = [
   },
 ];
 
-async function getProducts(req, res) {
+async function getProducts(req, res, next) {
   try {
-    const products = await Product.fetchAll();
+    console.log("req.user", req.user);
+
+    const filter = {
+      seller_id: req.user.id,
+    };
+    const products = await Product.fetchAll(filter);
     res.json(products);
   } catch (error) {
-    console.log(error);
+    next(error);
   }
 }
 
-async function getProductDetail(req, res) {
+async function getProductDetail(req, res, next) {
   try {
     const result = await Product.findById(req.params.id);
+    if (!result) {
+      const error = new Error("Product not found");
+      error.status = 404;
+      return next(error);
+    }
+
     res.json(result);
   } catch (error) {
-    console.log(error);
+    next(error);
   }
 }
 
-async function createProduct(req, res) {
-  console.log("req.body", req.body);
-
+async function createProduct(req, res, next) {
   try {
     const product = new Product(
       req.body.name,
@@ -48,9 +57,7 @@ async function createProduct(req, res) {
 
     res.status(201).json(product);
   } catch (error) {
-    console.log(error);
-
-    res.status(500).json({ message: "Internal server error" });
+    next(error);
   }
 }
 
