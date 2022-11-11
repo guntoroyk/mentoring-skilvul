@@ -15,3 +15,14 @@ services:
     restart: always
     ports:
       - 8081:8080
+
+  mongo:
+    image: mongo
+    restart: always
+    ports:
+      - 27017:27017
+
+  express-sequelize:
+    build: ./16-express-sequelize
+    ports:
+      - 3000:3000
